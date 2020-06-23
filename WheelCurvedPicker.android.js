@@ -28,22 +28,6 @@ const WheelCurvedPickerNative = requireNativeComponent('WheelCurvedPicker', Whee
 class WheelCurvedPicker extends React.Component {
 
     /**
-     * Picker PropTypes
-     */
-    propTypes: {
-        ...View.propTypes,
-        data: PropTypes.array,
-        textColor: ColorPropType,
-        textSize: PropTypes.number,
-        itemStyle: PropTypes.object,
-        itemSpace: PropTypes.number,
-        lineColor: ColorPropType,
-        onValueChange: PropTypes.func,
-        selectedValue: PropTypes.any,
-        selectedIndex: PropTypes.number,
-    };
-
-    /**
      * default props
      * @type {{}}
      */
@@ -57,9 +41,28 @@ class WheelCurvedPicker extends React.Component {
         this.state = this.stateFromProps(props);
     }
 
-    componentWillReceiveProps(props) {
-        this.setState(this.stateFromProps(props));
+    static getDerivedStateFromProps(nextProps, prevState) {
+        let selectedIndex = 0,
+            items = [];
+
+        React.Children.forEach(nextProps.children, function (child, index) {
+            if (child.props.value === nextProps.selectedValue) {
+                selectedIndex = index;
+            }
+            items.push({value: child.props.value, label: child.props.label});
+        });
+
+        const textSize = nextProps.itemStyle.fontSize;
+        const textColor = nextProps.itemStyle.color;
+        const fontFamily = nextProps.itemStyle.fontFamily;
+        const lineColor = nextProps.lineColor;
+
+        return {selectedIndex, items, textSize, textColor, fontFamily, lineColor};
     }
+
+    // componentWillReceiveProps(props) {
+    //     this.setState(this.stateFromProps(props));
+    // }
 
     render() {
         const selectedIndex = parseInt(this.state.selectedIndex);
@@ -104,10 +107,6 @@ class WheelCurvedPicker extends React.Component {
  * WheelCurvedPicker.Item
  */
 class Item extends React.Component {
-    propTypes: {
-        value: PropTypes.any, // string or integer basically
-        label: PropTypes.string,
-    };
 
     /**
      * These items don't get rendered directly.
@@ -116,6 +115,24 @@ class Item extends React.Component {
     render() {
         return null;
     }
+}
+
+WheelCurvedPicker.propTypes = {
+    ...View.propTypes,
+    data: PropTypes.array,
+    textColor: ColorPropType,
+    textSize: PropTypes.number,
+    itemStyle: PropTypes.object,
+    itemSpace: PropTypes.number,
+    lineColor: ColorPropType,
+    onValueChange: PropTypes.func,
+    selectedValue: PropTypes.any,
+    selectedIndex: PropTypes.number,
+}
+
+Item.propTypes = {
+    value: PropTypes.any, // string or integer basically
+    label: PropTypes.string,
 }
 
 WheelCurvedPicker.Item = Item;
